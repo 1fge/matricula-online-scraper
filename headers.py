@@ -8,3 +8,15 @@ def csrf_request_headers():
         'Pragma': 'no-cache',
         'Cache-Control': 'no-cache',
     }
+
+def download_image_headers():
+    return {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Origin': 'https://data.matricula-online.eu',
+        'Connection': 'keep-alive',
+        'Referer': 'https://data.matricula-online.eu/',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache',
+    }

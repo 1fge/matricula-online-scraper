@@ -6,7 +6,8 @@ import traceback
 
 from ast import literal_eval
 from bs4 import BeautifulSoup
-from headers import csrf_request_headers
+from headers import csrf_request_headers, download_image_headers
+from encryption_routine import encryption_routine
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -23,7 +24,6 @@ class Downloader:
         self.image_URLs_list = None
         self.csrf_token = None
 
-    ''
     @classmethod
     def log_error_and_exit(cls, error_message):
         logging.error(error_message)
@@ -64,8 +64,27 @@ class Downloader:
         self.image_URLs_list = literal_eval(full_files_list)
         logging.info(f"Fetched List of {len(self.image_URLs_list)} Images")
 
+    def save_image(self, image_content, file_number):
+        logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_list)}")
+        file_path = f"{self.images_dir}\\image_{file_number}.jpg"
+
+        with open(file_path, "wb") as f:
+            f.write(image_content)
+
+    def download_files(self):
+        for index, image_path in enumerate(self.image_URLs_list):
+            url = encryption_routine.createValidURL(image_path, self.csrf_token)
+            try:
+                response = self.session.get(url, headers=download_image_headers())
+                if response.content != 200:
+                    self.save_image(response.content, index + 1)
+                else:
+                    logging.info(f"Skipping File {index + 1} ({response.status_code} Response)")
+            except Exception:
+                logging.info(f"Skipping File {index + 1}\n ({traceback.format_exc()})")
 
 if __name__ == "__main__":
     download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001", "./images")
     download.prepare_images_dir()
     download.fetch_record_page()
+    download.download_files()
