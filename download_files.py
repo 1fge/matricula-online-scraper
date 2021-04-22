@@ -1,13 +1,15 @@
-import os
-import sys
 import logging
+import os
 import requests
+import sys
+import time
 import traceback
 
 from ast import literal_eval
 from bs4 import BeautifulSoup
-from headers import csrf_request_headers, download_image_headers
 from encryption_routine import encryption_routine
+from headers import csrf_request_headers, download_image_headers
+
 
 class Downloader:
     def __init__(self, record_URL, images_dir):
@@ -16,6 +18,7 @@ class Downloader:
         self.images_dir = images_dir
         self.image_URLs_and_labels = None
         self.csrf_token = None
+        self.CRAWL_SPEED = 2 # 2 second delay between each archive request
 
     @classmethod
     def log_error_and_exit(cls, error_message):
@@ -58,7 +61,7 @@ class Downloader:
         full_labels_list = literal_eval(start_labels_list.split('"],')[0].strip() + '"]')
 
         self.image_URLs_and_labels = tuple(zip(full_files_list, full_labels_list))
-        logging.info(f"Fetched List of {len(self.image_URLs_and_labels)} Images")
+        logging.info(f"Fetched List of {len(self.image_URLs_and_labels)} Images From '{self.record_URL}'")
 
     def save_image(self, image_content, image_label, file_number):
         logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}")
@@ -80,6 +83,7 @@ class Downloader:
                         self.save_image(response.content, image_label, file_number)
                     else:
                         logging.info(f"Skipping File {file_number} ({response.status_code} Response)")
+                    time.sleep(self.CRAWL_SPEED)
                     break
                 except requests.exceptions.ConnectionError:
                     if request_attempts < 3:
