@@ -21,7 +21,7 @@ class Downloader:
         self.session = requests.Session()
         self.record_URL = record_URL
         self.images_dir = images_dir
-        self.image_URLs_list = None
+        self.image_URLs_and_labels = None
         self.csrf_token = None
 
     @classmethod
@@ -39,7 +39,7 @@ class Downloader:
             response = self.session.get(self.record_URL, headers=csrf_request_headers())
             if response.status_code == 200:
                 self.get_csrf_token()
-                self.parse_image_URLs(response.text)
+                self.parse_image_URLs_and_labels(response.text)
             else:
                 self.log_error_and_exit(f"{response.status_code} Status Code Fetching CSRF Token, Exiting")
         except Exception:
@@ -54,34 +54,39 @@ class Downloader:
         else:
             self.log_error_and_exit("CSRF Token Not Received, Exiting")
 
-    def parse_image_URLs(self, record_reponse_text):
-        if '"files":' not in record_reponse_text:
+    def parse_image_URLs_and_labels(self, record_reponse_text):
+        if '"files":' not in record_reponse_text or "labels" not in record_reponse_text:
             self.log_error_and_exit("Error Parsing Image URLs, Exiting")
 
         start_files_list = record_reponse_text.split('"files":')[1]
-        full_files_list = start_files_list.split('"],')[0].strip() + '"]'
+        full_files_list = literal_eval(start_files_list.split('"],')[0].strip() + '"]')
 
-        self.image_URLs_list = literal_eval(full_files_list)
-        logging.info(f"Fetched List of {len(self.image_URLs_list)} Images")
+        start_labels_list = record_reponse_text.split('"labels":')[1]
+        full_labels_list = literal_eval(start_labels_list.split('"],')[0].strip() + '"]')
 
-    def save_image(self, image_content, file_number):
-        logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_list)}")
-        file_path = f"{self.images_dir}\\image_{file_number}.jpg"
+        self.image_URLs_and_labels = tuple(zip(full_files_list, full_labels_list))
+        logging.info(f"Fetched List of {len(self.image_URLs_and_labels)} Images")
+
+    def save_image(self, image_content, image_label, file_number):
+        logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}")
+        file_path = f"{self.images_dir}\\{image_label}.jpg"
 
         with open(file_path, "wb") as f:
             f.write(image_content)
 
     def download_files(self):
-        for index, image_path in enumerate(self.image_URLs_list):
+        for index, (image_path, image_label) in enumerate(self.image_URLs_and_labels):
             url = encryption_routine.createValidURL(image_path, self.csrf_token)
+            file_number = index + 1
+
             try:
                 response = self.session.get(url, headers=download_image_headers())
                 if response.content != 200:
-                    self.save_image(response.content, index + 1)
+                    self.save_image(response.content, image_label, file_number)
                 else:
-                    logging.info(f"Skipping File {index + 1} ({response.status_code} Response)")
+                    logging.info(f"Skipping File {file_number} ({response.status_code} Response)")
             except Exception:
-                logging.info(f"Skipping File {index + 1}\n ({traceback.format_exc()})")
+                logging.info(f"Skipping File {file_number}\n ({traceback.format_exc()})")
 
 if __name__ == "__main__":
     download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001", "./images")
