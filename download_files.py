@@ -9,13 +9,6 @@ from bs4 import BeautifulSoup
 from headers import csrf_request_headers, download_image_headers
 from encryption_routine import encryption_routine
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
-
 class Downloader:
     def __init__(self, record_URL, images_dir):
         self.session = requests.Session()
@@ -76,20 +69,36 @@ class Downloader:
 
     def download_files(self):
         for index, (image_path, image_label) in enumerate(self.image_URLs_and_labels):
+            request_attempts = 0
             url = encryption_routine.createValidURL(image_path, self.csrf_token)
             file_number = index + 1
 
-            try:
-                response = self.session.get(url, headers=download_image_headers())
-                if response.content != 200:
-                    self.save_image(response.content, image_label, file_number)
-                else:
-                    logging.info(f"Skipping File {file_number} ({response.status_code} Response)")
-            except Exception:
-                logging.info(f"Skipping File {file_number}\n ({traceback.format_exc()})")
+            while request_attempts < 3:
+                try:
+                    response = self.session.get(url, headers=download_image_headers())
+                    if response.status_code == 200:
+                        self.save_image(response.content, image_label, file_number)
+                    else:
+                        logging.info(f"Skipping File {file_number} ({response.status_code} Response)")
+                    break
+                except requests.exceptions.ConnectionError:
+                    if request_attempts < 3:
+                        request_attempts += 1
+                        logging.info(f"Retrying File {file_number}, Attempt ({request_attempts})")
+                    else:
+                        logging.info(f"Skipping File {file_number}, {request_attempts} failed attempts")
+                except Exception:
+                    logging.info(f"Skipping File {file_number}\n ({traceback.format_exc()})")
+                    break
 
 if __name__ == "__main__":
-    download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001", "./images")
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0002/?pg=1", "./images")
     download.prepare_images_dir()
     download.fetch_record_page()
     download.download_files()
