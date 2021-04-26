@@ -4,18 +4,19 @@ import requests
 import sys
 import time
 import traceback
+import uuid
 
 from ast import literal_eval
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 from encryption_routine import encryption_routine
 from headers import csrf_request_headers, download_image_headers
 
-
 class Downloader:
-    def __init__(self, record_URL, images_dir):
+    def __init__(self, record_URL, base_images_dir):
         self.session = requests.Session()
         self.record_URL = record_URL
-        self.images_dir = images_dir
+        self.base_images_dir = base_images_dir
+        self.archive_directory_name = None
         self.image_URLs_and_labels = None
         self.csrf_token = None
         self.CRAWL_SPEED = 2 # 2 second delay between each archive request
@@ -25,10 +26,14 @@ class Downloader:
         logging.error(error_message)
         sys.exit()
 
-    def prepare_images_dir(self):
-        if not os.path.exists(self.images_dir):
-            os.mkdir(self.images_dir)
-        logging.info(f"Saving Images to {os.path.abspath(self.images_dir)}")
+    def create_archive_directory(self):
+        archive_directory_path = f"{self.base_images_dir}\\{self.archive_directory_name}"
+
+        if not os.path.exists(self.base_images_dir):
+            os.mkdir(self.base_images_dir)
+            os.mkdir(archive_directory_path)
+        elif not os.path.exists(archive_directory_path):
+            os.mkdir(archive_directory_path)
 
     def fetch_record_page(self):
         try:
@@ -36,6 +41,8 @@ class Downloader:
             if response.status_code == 200:
                 self.get_csrf_token()
                 self.parse_image_URLs_and_labels(response.text)
+                self.parse_archive_name(response.text)
+                self.create_archive_directory()
             else:
                 self.log_error_and_exit(f"{response.status_code} Status Code Fetching CSRF Token, Exiting")
         except Exception:
@@ -63,9 +70,22 @@ class Downloader:
         self.image_URLs_and_labels = tuple(zip(full_files_list, full_labels_list))
         logging.info(f"Fetched List of {len(self.image_URLs_and_labels)} Images From '{self.record_URL}'")
 
+    def parse_archive_name(self, record_reponse_text):
+        try:
+            soup = bs(record_reponse_text, "html.parser")
+            archive_category = soup.find("table", {"class": "table table-register-data"}).find("a").text.strip()
+            archive_category = "".join([char for char in archive_category if char.isalnum()]) # removing characters that could cause errors when writing creating dir
+            archive_id = record_reponse_text.split("Archival identifier<td>")[1].split("\n")[0].strip()
+            archive_id = "".join([char for char in archive_id if char.isalnum()])
+
+            self.archive_directory_name = archive_category + "_" + archive_id
+        except Exception:
+            print("Error Parsing Archive Category and ID, Creating Random Directory Name")
+            self.archive_directory_name = str(uuid.uuid4())[0:18] # first 18 chars of a random UUID
+
     def save_image(self, image_content, image_label, file_number):
         logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}")
-        file_path = f"{self.images_dir}\\{image_label}.jpg"
+        file_path = f"{self.base_images_dir}\\{self.archive_directory_name}\\{image_label}.jpg"
 
         with open(file_path, "wb") as f:
             f.write(image_content)
@@ -103,6 +123,5 @@ if __name__ == "__main__":
     )
 
     download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0002/?pg=1", "./images")
-    download.prepare_images_dir()
     download.fetch_record_page()
     download.download_files()
