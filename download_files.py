@@ -27,12 +27,13 @@ class Downloader:
         sys.exit()
 
     def create_archive_directory(self):
-        archive_directory_path = f"{self.base_images_dir}\\{self.archive_directory_name}"
+        # archive_directory_path = f"{self.base_images_dir}\\{self.archive_directory_name}"
+        archive_directory_path = os.path.join(self.base_images_dir,self.archive_directory_name)
 
         if not os.path.exists(self.base_images_dir):
             os.mkdir(self.base_images_dir)
             os.mkdir(archive_directory_path)
-        elif not os.path.exists(archive_directory_path):
+        if not os.path.exists(archive_directory_path):
             os.mkdir(archive_directory_path)
 
     def fetch_record_page(self):
@@ -86,6 +87,7 @@ class Downloader:
     def save_image(self, image_content, image_label, file_number):
         logging.info(f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}")
         file_path = f"{self.base_images_dir}\\{self.archive_directory_name}\\{image_label}.jpg"
+        file_path = os.path.join(self.base_images_dir,self.archive_directory_name,f"{image_label}.jpg")
 
         with open(file_path, "wb") as f:
             f.write(image_content)
