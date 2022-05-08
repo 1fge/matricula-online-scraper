@@ -23,4 +23,8 @@ To Download a List of Archive URLs from a File:
 ```bash
 python main.py -o ./images -t ./urls.txt
 ```
+To Download a Range of Pages from an Archive:
+```bash
+python main.py -o ./images -r 10 -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
+```
 If you run into any problems, feel free to create an issue. Furthermore, your contribution is encouraged, so feel free to make a pull request if you think something can be improved. Enjoy!

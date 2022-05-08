@@ -12,10 +12,12 @@ from encryption_routine import encryption_routine
 from headers import csrf_request_headers, download_image_headers
 
 class Downloader:
-    def __init__(self, record_URL, base_images_dir):
+    def __init__(self, record_URL, file_range, base_images_dir):
         self.session = requests.Session()
         self.record_URL = record_URL
+        self.file_range = file_range
         self.base_images_dir = base_images_dir
+
         self.archive_directory_name = None
         self.image_URLs_and_labels = None
         self.csrf_token = None
@@ -69,6 +71,11 @@ class Downloader:
         full_labels_list = literal_eval(start_labels_list.split('"],')[0].strip() + '"]')
 
         self.image_URLs_and_labels = tuple(zip(full_files_list, full_labels_list))
+
+        # if a range is provided and the range is less than the number of scraped files, use it
+        if self.file_range is not None and self.file_range < len(self.image_URLs_and_labels):
+            self.image_URLs_and_labels = self.image_URLs_and_labels[0:self.file_range]
+
         logging.info(f"Fetched List of {len(self.image_URLs_and_labels)} Images From '{self.record_URL}'")
 
     def parse_archive_name(self, record_reponse_text):
@@ -116,6 +123,7 @@ class Downloader:
                 except Exception:
                     logging.info(f"Skipping File {file_number}\n ({traceback.format_exc()})")
                     break
+
 
 if __name__ == "__main__":
     logging.basicConfig(
