@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 __all__ = ['encryption_routine']
 
 # Don't look below, you will not understand this Python code :) I don't.
