@@ -4,27 +4,55 @@
 **Make sure you are using Python >=3.6**
 
 To Install Files:
-```bash
+```sh
 git clone https://github.com/1fge/matricula-online-scraper
 ```
 To Install Required Modules:
-```bash
+```sh
 pip install -r requirements.txt
 ```
+
+If you have a newer version of Python (e.g. Python-3.10),
+you might need to get the latest and greatest versions of the various dependencies,
+in which case you should run this instead:
+
+```sh
+pip install -r requirements-dev.txt
+```
+
 
 ## Usage
 After installing the dependencies, the scraper can be used directly from the command line.
 
 To Download a Single Archive:
-```bash
-python main.py -o ./images -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
+```sh
+python matricula-online-scraper -o ./images -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
 ```
+
+On some systems (e.g. Linux, or macOS) you might also be able to run simply with:
+```sh
+./matricula-online-scraper -o ./images -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
+```
+
+
+
 To Download a List of Archive URLs from a File:
-```bash
-python main.py -o ./images -t ./urls.txt
+```sh
+python matricula-online-scraper -o ./images -t ./urls.txt
 ```
 To Download a Range of Pages from an Archive:
-```bash
-python main.py -o ./images -r 10 -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
+```sh
+python matricula-online-scraper -o ./images -r 10 -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
 ```
+
+### Directory hierarchy
+Normally, the scraper will create a single directory for each parish+book, e.g. in the above example it will create a directory `images/militaerkirchenbuecher_0001/`.
+
+Sometimes (when downloading many books from different parishes), it might be more desirable to have a single directory for all books of a given parish. Use the `--deep` flag to create directories like `images/militaerkirchenbuecher/0001/`:
+
+```sh
+python matricula-online-scraper --deep  -o ./images -r 10 -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
+```
+
+## Issues
 If you run into any problems, feel free to create an issue. Furthermore, your contribution is encouraged, so feel free to make a pull request if you think something can be improved. Enjoy!
