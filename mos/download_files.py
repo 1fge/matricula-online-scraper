@@ -40,12 +40,8 @@ class Downloader:
         archive_directory_path = os.path.join(
             self.base_images_dir, self.archive_directory_name
         )
-
-        if not os.path.exists(self.base_images_dir):
-            os.mkdir(self.base_images_dir)
-            os.mkdir(archive_directory_path)
-        if not os.path.exists(archive_directory_path):
-            os.mkdir(archive_directory_path)
+        archive_directory_path = os.path.normpath(archive_directory_path)
+        os.makedirs(archive_directory_path, exist_ok=True)
 
     def fetch_record_page(self):
         try:
