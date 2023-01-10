@@ -70,7 +70,10 @@ class Downloader:
             self.log_error_and_exit("CSRF Token Not Received, Exiting")
 
     def parse_image_URLs_and_labels(self, record_response_text):
-        if '"files":' not in record_response_text or "labels" not in record_response_text:
+        if (
+            '"files":' not in record_response_text
+            or "labels" not in record_response_text
+        ):
             self.log_error_and_exit("Error Parsing Image URLs, Exiting")
 
         start_files_list = record_response_text.split('"files":')[1]
