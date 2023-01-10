@@ -130,7 +130,7 @@ class Downloader:
             logging.info(
                 "Error parsing Archive category and ID, creating directory name based on URL"
             )
-        self.archive_directory_name = archive_category + "_" + archive_id
+        self.archive_directory_name = os.path.join(archive_category, archive_id)
 
     def save_image(self, image_content, image_label, file_number):
         logging.info(
