@@ -8,8 +8,8 @@ import uuid
 
 from ast import literal_eval
 from bs4 import BeautifulSoup as bs
-from encryption_routine import encryption_routine
-from headers import csrf_request_headers, download_image_headers
+from mos.encryption_routine import encryption_routine
+from mos.headers import csrf_request_headers, download_image_headers
 
 class Downloader:
     def __init__(self, record_URL, file_range, base_images_dir):

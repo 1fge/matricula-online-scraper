@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 
-from download_files import Downloader
+from mos.download_files import Downloader
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
