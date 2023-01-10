@@ -20,12 +20,14 @@ except ModuleNotFoundError:
 
 
 class Downloader:
-    def __init__(self, record_URL, file_range, base_images_dir):
+    def __init__(self, record_URL, base_images_dir, args=None):
         self.session = requests.Session()
         self.record_URL = record_URL
-        self.file_range = file_range
         self.base_images_dir = base_images_dir
 
+        self.file_range = None
+        if args:
+            self.file_range = args.range
         self.archive_directory_name = None
         self.image_URLs_and_labels = None
         self.csrf_token = None
@@ -186,8 +188,8 @@ if __name__ == "__main__":
 
     download = Downloader(
         "https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0002/?pg=1",
-        None,
         "./images",
+        None,
     )
     download.fetch_record_page()
     download.download_files()

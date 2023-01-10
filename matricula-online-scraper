@@ -57,18 +57,18 @@ def verify_archive_list_exists(urls_file_path):
         sys.exit()
 
 
-def download_archive(url, file_range, output_directory):
-    download = Downloader(url, file_range, output_directory)
+def download_archive(url, output_directory, args):
+    download = Downloader(url, output_directory, args)
     download.fetch_record_page()
     download.download_files()
 
 
-def download_archives_from_list(urls_file_path, file_range, output_directory):
+def download_archives_from_list(urls_file_path, output_directory, args):
     with open(urls_file_path) as f:
         urls = f.read().splitlines()
 
     for url in urls:
-        download_archive(url, file_range, output_directory)
+        download_archive(url, output_directory, args)
 
 
 if __name__ == "__main__":
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     output_directory = args.output_directory
 
     if args.url is not None:
-        download_archive(args.url, args.range, output_directory)
+        download_archive(args.url, output_directory, args)
     else:
         verify_archive_list_exists(args.text_file)
-        download_archives_from_list(args.text_file, args.range, output_directory)
+        download_archives_from_list(args.text_file, output_directory, args)
