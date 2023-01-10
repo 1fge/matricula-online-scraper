@@ -8,8 +8,12 @@ import uuid
 
 from ast import literal_eval
 from bs4 import BeautifulSoup as bs
-from mos.encryption_routine import encryption_routine
-from mos.headers import csrf_request_headers, download_image_headers
+try:
+    from mos.encryption_routine import encryption_routine
+    from mos.headers import csrf_request_headers, download_image_headers
+except ModuleNotFoundError:
+    from encryption_routine import encryption_routine
+    from headers import csrf_request_headers, download_image_headers
 
 class Downloader:
     def __init__(self, record_URL, file_range, base_images_dir):
@@ -131,6 +135,6 @@ if __name__ == "__main__":
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0002/?pg=1", "./images")
+    download = Downloader("https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0002/?pg=1", None, "./images")
     download.fetch_record_page()
     download.download_files()
