@@ -117,7 +117,7 @@ class Downloader:
             archive_id = "".join([char for char in archive_id if char.isalnum()])
             self.archive_directory_name = archive_category + "_" + archive_id
         except Exception as e:
-            print(
+            logging.error(
                 "Error Parsing Archive Category and ID, Creating Random Directory Name"
             )
             self.archive_directory_name = str(uuid.uuid4())[
