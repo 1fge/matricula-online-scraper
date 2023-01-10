@@ -37,7 +37,6 @@ class Downloader:
         sys.exit()
 
     def create_archive_directory(self):
-        # archive_directory_path = f"{self.base_images_dir}\\{self.archive_directory_name}"
         archive_directory_path = os.path.join(
             self.base_images_dir, self.archive_directory_name
         )
@@ -127,9 +126,6 @@ class Downloader:
     def save_image(self, image_content, image_label, file_number):
         logging.info(
             f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}"
-        )
-        file_path = (
-            f"{self.base_images_dir}\\{self.archive_directory_name}\\{image_label}.jpg"
         )
         file_path = os.path.join(
             self.base_images_dir, self.archive_directory_name, f"{image_label}.jpg"
