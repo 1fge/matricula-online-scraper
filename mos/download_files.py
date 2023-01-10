@@ -26,8 +26,11 @@ class Downloader:
         self.base_images_dir = base_images_dir
 
         self.file_range = None
+        self.deep_hierarchy = False
         if args:
             self.file_range = args.range
+            self.deep_hierarchy = args.deep
+
         self.archive_directory_name = None
         self.image_URLs_and_labels = None
         self.csrf_token = None
@@ -132,7 +135,10 @@ class Downloader:
             logging.info(
                 "Error parsing Archive category and ID, creating directory name based on URL"
             )
-        self.archive_directory_name = os.path.join(archive_category, archive_id)
+        if self.deep_hierarchy:
+            self.archive_directory_name = os.path.join(archive_category, archive_id)
+        else:
+            self.archive_directory_name = archive_category + "_" + archive_id
 
     def save_image(self, image_content, image_label, file_number):
         logging.info(

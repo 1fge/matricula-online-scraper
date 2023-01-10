@@ -22,11 +22,17 @@ def get_parsed_args():
     download_parser.add_argument(
         "-o",
         "--output-directory",
-        help="The directory to store the folder of downloaded images",
+        help="The directory to store the folder(s) of downloaded images",
         required=True,
     )
     download_parser.add_argument(
         "-r", "--range", help="The number of pages beyond the input page to download"
+    )
+
+    download_parser.add_argument(
+        "--deep",
+        action='store_true',
+        help="create '<parish>/<book>/' sub-directories"
     )
 
     input_group = download_parser.add_mutually_exclusive_group(required=True)
