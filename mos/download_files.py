@@ -85,9 +85,8 @@ class Downloader:
             archive_category = "".join([char for char in archive_category if char.isalnum()]) # removing characters that could cause errors when writing creating dir
             archive_id = record_reponse_text.split("Archival identifier<td>")[1].split("\n")[0].strip()
             archive_id = "".join([char for char in archive_id if char.isalnum()])
-
             self.archive_directory_name = archive_category + "_" + archive_id
-        except Exception:
+        except Exception as e:
             print("Error Parsing Archive Category and ID, Creating Random Directory Name")
             self.archive_directory_name = str(uuid.uuid4())[0:18] # first 18 chars of a random UUID
 
