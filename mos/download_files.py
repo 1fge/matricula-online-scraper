@@ -74,14 +74,14 @@ class Downloader:
         else:
             self.log_error_and_exit("CSRF Token Not Received, Exiting")
 
-    def parse_image_URLs_and_labels(self, record_reponse_text):
-        if '"files":' not in record_reponse_text or "labels" not in record_reponse_text:
+    def parse_image_URLs_and_labels(self, record_response_text):
+        if '"files":' not in record_response_text or "labels" not in record_response_text:
             self.log_error_and_exit("Error Parsing Image URLs, Exiting")
 
-        start_files_list = record_reponse_text.split('"files":')[1]
+        start_files_list = record_response_text.split('"files":')[1]
         full_files_list = literal_eval(start_files_list.split('"],')[0].strip() + '"]')
 
-        start_labels_list = record_reponse_text.split('"labels":')[1]
+        start_labels_list = record_response_text.split('"labels":')[1]
         full_labels_list = literal_eval(
             start_labels_list.split('"],')[0].strip() + '"]'
         )
@@ -98,9 +98,9 @@ class Downloader:
             f"Fetched List of {len(self.image_URLs_and_labels)} Images From '{self.record_URL}'"
         )
 
-    def parse_archive_name(self, record_reponse_text):
+    def parse_archive_name(self, record_response_text):
         try:
-            soup = bs(record_reponse_text, "html.parser")
+            soup = bs(record_response_text, "html.parser")
             archive_category = (
                 soup.find("table", {"class": "table table-register-data"})
                 .find("a")
@@ -110,7 +110,7 @@ class Downloader:
                 [char for char in archive_category if char.isalnum()]
             )  # removing characters that could cause errors when writing creating dir
             archive_id = (
-                record_reponse_text.split("Archival identifier<td>")[1]
+                record_response_text.split("Archival identifier<td>")[1]
                 .split("\n")[0]
                 .strip()
             )
