@@ -99,18 +99,18 @@ class Downloader:
     def parse_archive_name(self, record_response_text):
         try:
             soup = bs(record_response_text, "html.parser")
-            archive_category = (
-                soup.find("table", {"class": "table table-register-data"})
-                .find("a")
-                .text.strip()
-            )
-            archive_category = "".join(
-                [char for char in archive_category if char.isalnum()]
-            )  # removing characters that could cause errors when writing creating dir
+            register_data = soup.find("table", {"class": "table table-register-data"})
+            archive_category = register_data.find("a").text.strip()
+
             archive_id = (
                 record_response_text.split("Archival identifier<td>")[1]
                 .split("\n")[0]
                 .strip()
+            )
+
+            # removing characters that could cause errors when writing creating dir
+            archive_category = "".join(
+                [char for char in archive_category if char.isalnum()]
             )
             archive_id = "".join([char for char in archive_id if char.isalnum()])
             self.archive_directory_name = archive_category + "_" + archive_id
