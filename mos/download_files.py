@@ -113,14 +113,24 @@ class Downloader:
                 [char for char in archive_category if char.isalnum()]
             )
             archive_id = "".join([char for char in archive_id if char.isalnum()])
-            self.archive_directory_name = archive_category + "_" + archive_id
+
         except Exception as e:
-            logging.error(
-                "Error Parsing Archive Category and ID, Creating Random Directory Name"
+            try:
+                archive_category, archive_id = self.record_URL.strip("/").split("/")[
+                    -2:
+                ]
+            except Exception as e:
+                logging.error(
+                    "Error parsing Archive category and ID, creating random directory name"
+                )
+                self.archive_directory_name = str(uuid.uuid4())[
+                    0:18
+                ]  # first 18 chars of a random UUID
+                return
+            logging.info(
+                "Error parsing Archive category and ID, creating directory name based on URL"
             )
-            self.archive_directory_name = str(uuid.uuid4())[
-                0:18
-            ]  # first 18 chars of a random UUID
+        self.archive_directory_name = archive_category + "_" + archive_id
 
     def save_image(self, image_content, image_label, file_number):
         logging.info(
