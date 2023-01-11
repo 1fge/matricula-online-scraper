@@ -22,11 +22,11 @@ def get_parsed_args():
     download_parser.add_argument(
         "-o",
         "--output-directory",
-        help="The directory to store the folder(s) of downloaded images",
+        help="the directory to store the folder(s) of downloaded images",
         required=True,
     )
     download_parser.add_argument(
-        "-r", "--range", help="The number of pages beyond the input page to download"
+        "-r", "--range", help="the number of pages beyond the input page to download"
     )
 
     download_parser.add_argument(
@@ -37,7 +37,7 @@ def get_parsed_args():
         "--include-fullname",
         dest="include_fullname",
         action="store_true",
-        help="Include human readable name in <book>",
+        help="include human readable name in <book>",
     )
 
     download_parser.add_argument(
@@ -55,7 +55,7 @@ def get_parsed_args():
     input_group = download_parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument("-u", "--url", help="URL to download the images from")
     input_group.add_argument(
-        "-t", "--text-file", help="Path to file containing a list of scanned image URLs"
+        "-t", "--text-file", help="path to file containing a list of scanned image URLs"
     )
 
     parsed_args = download_parser.parse_args()
