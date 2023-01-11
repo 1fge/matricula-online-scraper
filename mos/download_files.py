@@ -40,6 +40,8 @@ class Downloader:
         if args:
             self.file_range = args.range
             self.deep_hierarchy = args.deep
+            if args.crawl_speed and args.crawl_speed > 0:
+                self.CRAWL_SPEED = args.crawl_speed
 
     @classmethod
     def log_error_and_exit(cls, error_message):

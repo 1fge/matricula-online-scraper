@@ -35,6 +35,12 @@ def get_parsed_args():
         help="create '<parish>/<book>/' sub-directories"
     )
 
+    download_parser.add_argument(
+        "--crawl-speed",
+        type=float,
+        help="time between downloads (in seconds)"
+    )
+
     input_group = download_parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument("-u", "--url", help="URL to download the images from")
     input_group.add_argument(
