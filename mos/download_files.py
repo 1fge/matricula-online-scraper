@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup as bs
 
 try:
     from pathvalidate import sanitize_filename
-except ModuleNotFountError:
+except ModuleNotFoundError:
 
     def sanitize_filename(path):
         return "".join([_ for _ in path if _.isalnum()])
