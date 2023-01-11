@@ -36,12 +36,14 @@ class Downloader:
         self.image_URLs_and_labels = None
         self.csrf_token = None
         self.CRAWL_SPEED = 2  # 2 second delay between each archive request
+        self.skip_existing = False
 
         if args:
             self.file_range = args.range
             self.deep_hierarchy = args.deep
             if args.crawl_speed and args.crawl_speed > 0:
                 self.CRAWL_SPEED = args.crawl_speed
+            self.skip_existing = args.skip_existing
 
     @classmethod
     def log_error_and_exit(cls, error_message):
@@ -146,14 +148,10 @@ class Downloader:
         else:
             self.archive_directory_name = archive_category + "_" + archive_id
 
-    def save_image(self, image_content, image_label, file_number):
+    def save_image(self, image_content, file_path, file_number):
         logging.info(
-            f"Downloaded File {file_number} of {len(self.image_URLs_and_labels)}"
+            f"Downloaded '{file_path}' [{file_number}/{len(self.image_URLs_and_labels)}]"
         )
-        file_path = os.path.join(
-            self.base_images_dir, self.archive_directory_name, f"{image_label}.jpg"
-        )
-
         with open(file_path, "wb") as f:
             f.write(image_content)
 
@@ -162,12 +160,18 @@ class Downloader:
             request_attempts = 0
             url = encryption_routine.createValidURL(image_path, self.csrf_token)
             file_number = index + 1
+            file_path = os.path.join(self.base_images_dir, self.archive_directory_name, f"{image_label}.jpg")
+            if self.skip_existing and os.path.exists(file_path):
+                logging.info(
+                    f"Skip existing '{file_path}' [{file_number}/{len(self.image_URLs_and_labels)}]"
+                )
+                continue
 
             while request_attempts < 3:
                 try:
                     response = self.session.get(url, headers=download_image_headers())
                     if response.status_code == 200:
-                        self.save_image(response.content, image_label, file_number)
+                        self.save_image(response.content, file_path, file_number)
                     else:
                         logging.info(
                             f"Skipping File {file_number} ({response.status_code} Response)"

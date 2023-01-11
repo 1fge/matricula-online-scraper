@@ -36,6 +36,13 @@ def get_parsed_args():
     )
 
     download_parser.add_argument(
+        "-c", "--continue",
+        action='store_true',
+        dest='skip_existing',
+        help="continue partial download (don't attempt to download already downloaded files)"
+    )
+
+    download_parser.add_argument(
         "--crawl-speed",
         type=float,
         help="time between downloads (in seconds)"
