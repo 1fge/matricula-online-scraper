@@ -34,6 +34,13 @@ def get_parsed_args():
     )
 
     download_parser.add_argument(
+        "--include-fullname",
+        dest="include_fullname",
+        action="store_true",
+        help="Include human readable name in <book>",
+    )
+
+    download_parser.add_argument(
         "-c",
         "--continue",
         action="store_true",

@@ -40,6 +40,7 @@ class Downloader:
         self.csrf_token = None
         self.CRAWL_SPEED = 2  # 2 second delay between each archive request
         self.skip_existing = False
+        self.include_fullname = False
 
         if args:
             self.file_range = args.range
@@ -47,6 +48,7 @@ class Downloader:
             if args.crawl_speed and args.crawl_speed > 0:
                 self.CRAWL_SPEED = args.crawl_speed
             self.skip_existing = args.skip_existing
+            self.include_fullname = args.include_fullname
 
     @classmethod
     def log_error_and_exit(cls, error_message):
@@ -122,6 +124,13 @@ class Downloader:
 
             archive_category = register_data[0].text.strip()
             archive_id = register_data[1].text.strip()
+            if self.include_fullname:
+                try:
+                    fullname = register_data[2].text.strip()
+                    if fullname:
+                        archive_id += "__" + fullname
+                except:
+                    pass
 
         except Exception as e:
             try:
