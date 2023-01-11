@@ -12,12 +12,17 @@ from ast import literal_eval
 from bs4 import BeautifulSoup as bs
 
 try:
+    from pathvalidate import sanitize_filename
+except ModuleNotFountError:
+    def sanitize_filename(path):
+        return "".join([_ for _ in path if _.isalnum()])
+
+try:
     from mos.encryption_routine import encryption_routine
     from mos.headers import csrf_request_headers, download_image_headers
 except ModuleNotFoundError:
     from encryption_routine import encryption_routine
     from headers import csrf_request_headers, download_image_headers
-
 
 class Downloader:
     def __init__(self, record_URL, base_images_dir, args=None):
@@ -113,12 +118,6 @@ class Downloader:
                 .strip()
             )
 
-            # removing characters that could cause errors when writing creating dir
-            archive_category = "".join(
-                [char for char in archive_category if char.isalnum()]
-            )
-            archive_id = "".join([char for char in archive_id if char.isalnum()])
-
         except Exception as e:
             try:
                 archive_category, archive_id = self.record_URL.strip("/").split("/")[
@@ -135,6 +134,11 @@ class Downloader:
             logging.info(
                 "Error parsing Archive category and ID, creating directory name based on URL"
             )
+
+        # removing characters that could cause errors when writing creating dir
+        archive_category = sanitize_filename(archive_category)
+        archive_id = sanitize_filename(archive_id)
+
         if self.deep_hierarchy:
             self.archive_directory_name = os.path.join(archive_category, archive_id)
         else:
