@@ -41,6 +41,7 @@ class Downloader:
         self.CRAWL_SPEED = 2  # 2 second delay between each archive request
         self.skip_existing = False
         self.include_fullname = False
+        self.simple_dirnames = False
 
         if args:
             self.file_range = args.range
@@ -49,6 +50,7 @@ class Downloader:
                 self.CRAWL_SPEED = args.crawl_speed
             self.skip_existing = args.skip_existing
             self.include_fullname = args.include_fullname
+            self.simple_dirnames = args.simple_dirnames
 
     @classmethod
     def log_error_and_exit(cls, error_message):
@@ -117,6 +119,8 @@ class Downloader:
 
     def parse_archive_name(self, record_response_text):
         try:
+            if self.simple_dirnames:
+                raise Exception("user requested to not parse HTML-page for output directory names")
             soup = bs(record_response_text, "html.parser")
             register_data = soup.find(
                 "table", {"class": "table table-register-data"}
@@ -133,6 +137,7 @@ class Downloader:
                     pass
 
         except Exception as e:
+            logging.debug("Fallback to using URL for directory name", exc_info=True)
             try:
                 archive_category, archive_id = self.record_URL.strip("/").split("/")[
                     -2:

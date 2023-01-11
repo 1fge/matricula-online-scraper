@@ -33,11 +33,17 @@ def get_parsed_args():
         "--deep", action="store_true", help="create '<parish>/<book>/' sub-directories"
     )
 
-    download_parser.add_argument(
+    dirname_group = download_parser.add_mutually_exclusive_group(required=False)
+    dirname_group.add_argument(
         "--include-fullname",
         dest="include_fullname",
         action="store_true",
         help="include human readable name in <book>",
+    )
+    dirname_group.add_argument(
+        "--simple-dirnames",
+        action="store_true",
+        help="calculate the directory-names from the URL, rather than parsing the webpage",
     )
 
     download_parser.add_argument(
