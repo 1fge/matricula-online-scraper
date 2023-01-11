@@ -116,14 +116,12 @@ class Downloader:
     def parse_archive_name(self, record_response_text):
         try:
             soup = bs(record_response_text, "html.parser")
-            register_data = soup.find("table", {"class": "table table-register-data"})
-            archive_category = register_data.find("a").text.strip()
+            register_data = soup.find(
+                "table", {"class": "table table-register-data"}
+            ).findAll("td")
 
-            archive_id = (
-                record_response_text.split("Archival identifier<td>")[1]
-                .split("\n")[0]
-                .strip()
-            )
+            archive_category = register_data[0].text.strip()
+            archive_id = register_data[1].text.strip()
 
         except Exception as e:
             try:
