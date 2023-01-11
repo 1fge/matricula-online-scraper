@@ -63,7 +63,7 @@ def validate_args(parsed_args):
         return parsed_args
 
     if not parsed_args.range.isnumeric():
-        logging.error(f"Invalid Range: '{parsed_args.range}', Exiting")
+        logging.error(f"Invalid range: '{parsed_args.range}', exiting")
         sys.exit()
 
     parsed_args.range = int(parsed_args.range)
@@ -72,7 +72,7 @@ def validate_args(parsed_args):
 
 def verify_archive_list_exists(urls_file_path):
     if not os.path.exists(urls_file_path):
-        logging.error(f"{urls_file_path} Not Found, Exiting")
+        logging.error(f"{urls_file_path} Not Found, exiting")
         sys.exit()
 
 

@@ -107,7 +107,7 @@ class Downloader:
             self.image_URLs_and_labels = self.image_URLs_and_labels[0 : self.file_range]
 
         logging.info(
-            f"Fetched List of {len(self.image_URLs_and_labels)} Images From '{self.record_URL}'"
+            f"Fetched list of {len(self.image_URLs_and_labels)} images from '{self.record_URL}'"
         )
 
     def parse_archive_name(self, record_response_text):
@@ -174,7 +174,7 @@ class Downloader:
                         self.save_image(response.content, file_path, file_number)
                     else:
                         logging.info(
-                            f"Skipping File {file_number} ({response.status_code} Response)"
+                            f"Skipping file {file_number} ({response.status_code} Response)"
                         )
                     time.sleep(self.CRAWL_SPEED)
                     break
@@ -182,15 +182,15 @@ class Downloader:
                     if request_attempts < 3:
                         request_attempts += 1
                         logging.info(
-                            f"Retrying File {file_number}, Attempt ({request_attempts})"
+                            f"Retrying file {file_number}, Attempt ({request_attempts})"
                         )
                     else:
                         logging.info(
-                            f"Skipping File {file_number}, {request_attempts} failed attempts"
+                            f"Skipping file {file_number}, {request_attempts} failed attempts"
                         )
                 except Exception:
                     logging.info(
-                        f"Skipping File {file_number}\n ({traceback.format_exc()})"
+                        f"Skipping file {file_number}\n ({traceback.format_exc()})"
                     )
                     break
 
