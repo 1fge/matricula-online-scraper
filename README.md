@@ -54,5 +54,19 @@ Sometimes (when downloading many books from different parishes), it might be mor
 python matricula-online-scraper --deep  -o ./images -r 10 -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001
 ```
 
+### Directory names
+Normally, the scraper will create a directory per collection, using the names found on the given webpage.
+Sometimes this is can be a bit cryptic, as many collections use a simple numeric ID to identify them.
+You can use the `--include-fullname` option to *add* a human readable string (taken from the webpage) that explains the content of the collection.
+
+E.g. the collection found at https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001 will normally have a simple ID `0001`, but with `--include-fullname` this will become `0001__Aachen - Taufen` which probably makes more sense.
+
+Note that extracting the names from the webpage is a bit brittle. You can use the `--simple-dirnames` to skip this step and just calculate the directory name from the URL itself
+(so https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher/0001 will become `militaerkirchenbuecher_0001` (using the last two components of the URL).
+
+### Scraper behaviour
+Use the `--continue` flag to skip already downloaded files.
+This is useful if you are interrupted halfway through downloading a 500 pages collection...
+
 ## Issues
 If you run into any problems, feel free to create an issue. Furthermore, your contribution is encouraged, so feel free to make a pull request if you think something can be improved. Enjoy!
