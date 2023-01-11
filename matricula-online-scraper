@@ -30,22 +30,19 @@ def get_parsed_args():
     )
 
     download_parser.add_argument(
-        "--deep",
-        action='store_true',
-        help="create '<parish>/<book>/' sub-directories"
+        "--deep", action="store_true", help="create '<parish>/<book>/' sub-directories"
     )
 
     download_parser.add_argument(
-        "-c", "--continue",
-        action='store_true',
-        dest='skip_existing',
-        help="continue partial download (don't attempt to download already downloaded files)"
+        "-c",
+        "--continue",
+        action="store_true",
+        dest="skip_existing",
+        help="continue partial download (don't attempt to download already downloaded files)",
     )
 
     download_parser.add_argument(
-        "--crawl-speed",
-        type=float,
-        help="time between downloads (in seconds)"
+        "--crawl-speed", type=float, help="time between downloads (in seconds)"
     )
 
     input_group = download_parser.add_mutually_exclusive_group(required=True)

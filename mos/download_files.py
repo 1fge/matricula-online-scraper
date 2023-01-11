@@ -14,8 +14,10 @@ from bs4 import BeautifulSoup as bs
 try:
     from pathvalidate import sanitize_filename
 except ModuleNotFountError:
+
     def sanitize_filename(path):
         return "".join([_ for _ in path if _.isalnum()])
+
 
 try:
     from mos.encryption_routine import encryption_routine
@@ -23,6 +25,7 @@ try:
 except ModuleNotFoundError:
     from encryption_routine import encryption_routine
     from headers import csrf_request_headers, download_image_headers
+
 
 class Downloader:
     def __init__(self, record_URL, base_images_dir, args=None):
@@ -160,7 +163,9 @@ class Downloader:
             request_attempts = 0
             url = encryption_routine.createValidURL(image_path, self.csrf_token)
             file_number = index + 1
-            file_path = os.path.join(self.base_images_dir, self.archive_directory_name, f"{image_label}.jpg")
+            file_path = os.path.join(
+                self.base_images_dir, self.archive_directory_name, f"{image_label}.jpg"
+            )
             if self.skip_existing and os.path.exists(file_path):
                 logging.info(
                     f"Skip existing '{file_path}' [{file_number}/{len(self.image_URLs_and_labels)}]"
