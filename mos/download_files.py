@@ -32,14 +32,14 @@ class Downloader:
 
         self.file_range = None
         self.deep_hierarchy = False
-        if args:
-            self.file_range = args.range
-            self.deep_hierarchy = args.deep
-
         self.archive_directory_name = None
         self.image_URLs_and_labels = None
         self.csrf_token = None
         self.CRAWL_SPEED = 2  # 2 second delay between each archive request
+
+        if args:
+            self.file_range = args.range
+            self.deep_hierarchy = args.deep
 
     @classmethod
     def log_error_and_exit(cls, error_message):
