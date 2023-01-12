@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import os
+import sys
+
+from mos.download_files import Downloader
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+
+def get_parsed_args():
+    download_parser = argparse.ArgumentParser(
+        description="Download scanned images from matricula-online"
+    )
+
+    download_parser.add_argument(
+        "-o",
+        "--output-directory",
+        help="the directory to store the folder(s) of downloaded images",
+        required=True,
+    )
+    download_parser.add_argument(
+        "-r", "--range", help="the number of pages beyond the input page to download"
+    )
+
+    download_parser.add_argument(
+        "--deep", action="store_true", help="create '<parish>/<book>/' sub-directories"
+    )
+
+    dirname_group = download_parser.add_mutually_exclusive_group(required=False)
+    dirname_group.add_argument(
+        "--include-fullname",
+        dest="include_fullname",
+        action="store_true",
+        help="include human readable name in <book>",
+    )
+    dirname_group.add_argument(
+        "--simple-dirnames",
+        action="store_true",
+        help="calculate the directory-names from the URL, rather than parsing the webpage",
+    )
+
+    download_parser.add_argument(
+        "-c",
+        "--continue",
+        action="store_true",
+        dest="skip_existing",
+        help="continue partial download (don't attempt to download already downloaded files)",
+    )
+
+    download_parser.add_argument(
+        "--crawl-speed", type=float, help="time between downloads (in seconds)"
+    )
+
+    input_group = download_parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument("-u", "--url", help="URL to download the images from")
+    input_group.add_argument(
+        "-t", "--text-file", help="path to file containing a list of scanned image URLs"
+    )
+
+    parsed_args = download_parser.parse_args()
+    return validate_args(parsed_args)
+
+
+def validate_args(parsed_args):
+    if parsed_args.range is None:
+        return parsed_args
+
+    if not parsed_args.range.isnumeric():
+        logging.error(f"Invalid range: '{parsed_args.range}', exiting")
+        sys.exit()
+
+    parsed_args.range = int(parsed_args.range)
+    return parsed_args
+
+
+def verify_archive_list_exists(urls_file_path):
+    if not os.path.exists(urls_file_path):
+        logging.error(f"{urls_file_path} Not Found, exiting")
+        sys.exit()
+
+
+def download_archive(url, output_directory, args):
+    download = Downloader(url, output_directory, args)
+    download.fetch_record_page()
+    download.download_files()
+
+
+def download_archives_from_list(urls_file_path, output_directory, args):
+    with open(urls_file_path) as f:
+        urls = f.read().splitlines()
+
+    for url in urls:
+        download_archive(url, output_directory, args)
+
+
+if __name__ == "__main__":
+    args = get_parsed_args()
+    output_directory = args.output_directory
+
+    if args.url is not None:
+        download_archive(args.url, output_directory, args)
+    else:
+        verify_archive_list_exists(args.text_file)
+        download_archives_from_list(args.text_file, output_directory, args)
