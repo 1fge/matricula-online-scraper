@@ -1,0 +1,4 @@
+beautifulsoup4
+Js2Py
+requests
+pathvalidate
