@@ -88,8 +88,12 @@ def verify_archive_list_exists(urls_file_path):
 
 def download_archive(url, output_directory, args):
     download = Downloader(url, output_directory, args)
-    download.fetch_record_page()
-    download.download_files()
+
+    if Downloader.is_registers_url(url):
+        download.fetch_registers_page_and_download_all()
+    else:
+        download.fetch_record_page()
+        download.download_files()
 
 
 def download_archives_from_list(urls_file_path, output_directory, args):

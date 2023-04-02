@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import itertools
 import logging
 import os
 import requests
@@ -57,12 +58,68 @@ class Downloader:
         logging.error(error_message)
         sys.exit()
 
+    @staticmethod
+    def is_registers_url(url):
+        try:
+            response = requests.Session().get(url, headers=csrf_request_headers())
+            soup = bs(response.text, "html.parser")
+            register_header = soup.find("h3", {"id": "register-header"})
+            return register_header is not None
+        except Exception:
+            return False
+
     def create_archive_directory(self):
         archive_directory_path = os.path.join(
             self.base_images_dir, self.archive_directory_name
         )
         archive_directory_path = os.path.normpath(archive_directory_path)
         os.makedirs(archive_directory_path, exist_ok=True)
+
+    def fetch_registers_page_and_download_all(self):
+        try:
+            # get first registers page to determine how many pages to parse
+            response = self.session.get(self.record_URL, headers=csrf_request_headers())
+            if response.status_code != 200:
+                self.log_error_and_exit(
+                    f"{response.status_code} Status Code Fetching CSRF Token, Exiting"
+                )
+                return
+            registers_pages = list(self.registers_page_parse_list_pages(response.text))
+            logging.info(
+                f"Fetched list of {len(registers_pages)} register pages on: {self.record_URL}"
+            )
+
+            # get registers page to determine how many pages to parse
+            def record_urls_from_page(base_url, page):
+                url = f"{base_url}?page={page}"
+                response = self.session.get(url, headers=csrf_request_headers())
+                if response.status_code != 200:
+                    self.log_error_and_exit(
+                        f"{response.status_code} Status Code Fetching CSRF Token, Exiting"
+                    )
+                    return
+                record_URLs = list(self.registers_page_parse(response.text))
+                logging.info(
+                    f"Fetched {len(record_URLs)} archive urls on '{url}' [{page}/{len(registers_pages)}]"
+                )
+                yield from record_URLs
+
+            record_urls_gens = (
+                record_urls_from_page(self.record_URL, page) for page in registers_pages
+            )
+            record_urls = list(itertools.chain.from_iterable(record_urls_gens))
+            logging.info(f"Found total of {len(record_urls)} archive URLs")
+            logging.debug("Archive URLs:" + "\n".join(record_urls))
+
+            # download all records
+            for record_URL in record_urls:
+                self.record_URL = record_URL
+                self.fetch_record_page()
+                self.download_files()
+        except Exception:
+            self.log_error_and_exit(
+                f"Unexpected Error Fetching and Parsing Registers Page, Exiting\n{traceback.format_exc()}"
+            )
 
     def fetch_record_page(self):
         try:
@@ -90,6 +147,51 @@ class Downloader:
         else:
             self.log_error_and_exit("CSRF Token Not Received, Exiting")
 
+    def registers_page_parse_list_pages(self, response_text):
+        try:
+            soup = bs(response_text, "html.parser")
+
+            # there might be multiple pages
+            register_header = soup.find("h3", {"id": "register-header"})
+            page_links_list = register_header.findNext("ul")
+            if page_links_list is None:
+                yield 1
+                return
+            last_page_link = page_links_list.findAll("a", {"class": "page-link"})[-2]
+            last_page_no = int(last_page_link.getText())
+            pages = (i + 1 for i in range(last_page_no))
+
+            yield from pages
+        except Exception:
+            self.log_error_and_exit(
+                f"Unexpected Error Fetching Registers Page, Exiting\n{traceback.format_exc()}"
+            )
+
+    def registers_page_parse(self, response_text):
+        try:
+            soup = bs(response_text, "html.parser")
+            registers_table_rows = soup.find(
+                "div", {"class": "table-responsive"}
+            ).findAll("tr")
+            registers_table_cells = (
+                tr.findChildren("td") for tr in registers_table_rows
+            )
+            registers_name_cells = (
+                tds[1] for tds in registers_table_cells if len(tds) > 1
+            )
+            registers_names = (td.getText() for td in registers_name_cells)
+            record_urls = (
+                f"{self.record_URL}/{register_name}"
+                for register_name in registers_names
+            )
+
+            yield from record_urls
+        except Exception:
+            self.log_error_and_exit(
+                f"Unexpected Error Fetching Registers Page, Exiting\n{traceback.format_exc()}"
+            )
+            return []
+
     def parse_image_URLs_and_labels(self, record_response_text):
         if (
             '"files":' not in record_response_text
@@ -114,13 +216,15 @@ class Downloader:
             self.image_URLs_and_labels = self.image_URLs_and_labels[0 : self.file_range]
 
         logging.info(
-            f"Fetched list of {len(self.image_URLs_and_labels)} images from '{self.record_URL}'"
+            f"Fetched list of {len(self.image_URLs_and_labels)} images from archive '{self.record_URL}'"
         )
 
     def parse_archive_name(self, record_response_text):
         try:
             if self.simple_dirnames:
-                raise Exception("user requested to not parse HTML-page for output directory names")
+                raise Exception(
+                    "user requested to not parse HTML-page for output directory names"
+                )
             soup = bs(record_response_text, "html.parser")
             register_data = soup.find(
                 "table", {"class": "table table-register-data"}

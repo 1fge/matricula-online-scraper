@@ -35,7 +35,10 @@ On some systems (e.g. Linux, or macOS) you might also be able to run simply with
 ```
 
 
-
+To Download a all Archives for a given place, just omit the Archive:
+```sh
+python matricula-online-scraper -o ./images -u https://data.matricula-online.eu/en/deutschland/akmb/militaerkirchenbuecher
+```
 To Download a List of Archive URLs from a File:
 ```sh
 python matricula-online-scraper -o ./images -t ./urls.txt
